@@ -1,32 +1,51 @@
 import requests
 from telegram import Update
-from telegram.ext import Application, CommandHandler, CallbackContext, filters
+from telegram.ext import Application, CommandHandler, CallbackContext
 
-# Configuração do Bot
+# Configs
+#Bot:t.me/CryptoAlertPrice_bot.
 TELEGRAM_BOT_TOKEN = "8127477680:AAFzs5tPpThWgo9PrCbLzjPli5FCqZczmpQ"
+API_KEY = "aaf4afa4-25bd-4894-909a-f312bf4d77a7"
 
-# Função para buscar os preços de BTC, ETH e SOL
 def get_crypto_prices():
-    url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana&vs_currencies=usd"
-    response = requests.get(url)
+    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
+    parameters = {
+        'start': '1',
+        'limit': '2',
+        'convert': 'USD'
+    }
+    headers = {
+        'Accepts': 'application/json',
+        'X-CMC_PRO_API_KEY': API_KEY,
+    }
+
+    response = requests.get(url, headers=headers, params=parameters)
+
+    print(f"URL: {url}")  
+    print(f"Status Code: {response.status_code}")  
+    print(f"Response: {response.text}") 
 
     if response.status_code == 200:
-        prices = response.json()
-        btc_price = prices["bitcoin"]["usd"]
-        eth_price = prices["ethereum"]["usd"]
-        sol_price = prices["solana"]["usd"]
+        data = response.json()
+        prices = {coin['symbol']: coin['quote']['USD']['price'] for coin in data['data']}
+        
+        btc_price = prices.get('BTC', "❌ Error: Bitcoin price not found.")
+        eth_price = prices.get('ETH', "❌ Error: Ethereum price not found.")
+
+        if isinstance(btc_price, float):
+            btc_price = f"{btc_price:.2f}"
+        if isinstance(eth_price, float):
+            eth_price = f"{eth_price:.2f}"
 
         return f"""
         🚀 **Preços das Criptomoedas:**
         🟡 **Bitcoin (BTC):** ${btc_price}
         🔵 **Ethereum (ETH):** ${eth_price}
-        🟠 **Solana (SOL):** ${sol_price}
         """
     else:
-        return "❌ Erro ao buscar os preços. Tente novamente mais tarde."
+        return "❌ Error fetching prices. Please try again later."
 
-# Função que responde ao comando /start
-async def start(update: Update, context):
+async def start(update: Update, context: CallbackContext):
     chat_id = update.message.chat_id
     first_name = update.message.from_user.first_name  
 
@@ -37,20 +56,17 @@ async def start(update: Update, context):
 
     await update.message.reply_text(message, parse_mode="Markdown")
 
-# Função que responde ao comando /prices
-async def send_crypto_prices(update: Update, context):
+async def send_crypto_prices(update: Update, context: CallbackContext):
     message = get_crypto_prices()
     await update.message.reply_text(message, parse_mode="Markdown")
 
-# Configuração do bot usando a nova estrutura
 def main():
     app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
-    # Adicionar comandos
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("prices", send_crypto_prices))
 
-    print("🤖 Bot iniciado... Envie /start no Telegram!")
+    print("🤖 Bot init... Send /start in Telegram!")
     app.run_polling()
 
 if __name__ == "__main__":
