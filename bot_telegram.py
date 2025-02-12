@@ -1,6 +1,6 @@
 import requests
 
-# Configurações
+
 TELEGRAM_BOT_TOKEN = "8127477680:AAFzs5tPpThWgo9PrCbLzjPli5FCqZczmpQ"
 CHAT_ID = "7540701922"
 
@@ -14,5 +14,4 @@ def send_telegram_message(message):
     else: 
         print(f"❌ Failed to send message. Error: {response.text}")
 
-# Testando o envio da mensagem
 send_telegram_message("Hello, this is a test message from your bot!")
