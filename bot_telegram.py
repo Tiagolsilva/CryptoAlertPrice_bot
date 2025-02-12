@@ -3,14 +3,13 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, CallbackContext
 
 # Configs
-#Bot:t.me/CryptoAlertPrice_bot.
-TELEGRAM_BOT_TOKEN = "8127477680:AAFzs5tPpThWgo9PrCbLzjPli5FCqZczmpQ"
-API_KEY = "aaf4afa4-25bd-4894-909a-f312bf4d77a7"
+TELEGRAM_BOT_TOKEN = "Your Telegram Bot Token"
+API_KEY = "Your CoinMarketCap API Key"
 
 def get_crypto_prices():
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
     parameters = {
-        'start': '1',
+        'start': '10',
         'limit': '2',
         'convert': 'USD'
     }
